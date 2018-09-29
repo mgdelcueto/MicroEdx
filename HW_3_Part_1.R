@@ -5,7 +5,8 @@ library("tidyverse")
 
 #Getting the data
 patho<-getwd()
-path<-paste(str_trim(getwd()),"/data/",sep="")
+path<-paste(patho,"/data/",sep="")
+pathg<-paste(patho,"/graph/",sep="")
 setwd(path)
 gender_data <- as_tibble(read.csv("Gender_StatsData.csv"))
 
@@ -38,6 +39,7 @@ plotdata_bygroupyear <- mutate(plotdata_bygroupyear, Year=as.numeric(str_replace
 ggplot (plotdata_bygroupyear,aes(x=Year,y=FertilityRate,group=Country.Code,color=Country.Code))+
   geom_line()+
   labs(title='Fertility Rate by Country-Income-Level over Time')
+ggsave(paste(pathg,"Graf_1.png",sep=""))
 
 #Compare two year 1960 2000
 #bytwoyears <- select(teenager_fr,ï..Country.Name,Country.Code,X1960,X2000)
@@ -46,14 +48,21 @@ bytwoyears<-gather(teenager_fr,Year,FertilityRate,X1960:X2000) %>%
 ggplot(bytwoyears,aes(x=FertilityRate))+
   geom_histogram(data=subset(bytwoyears,Year=="X1960"), color ="darkgreen",fill="green",alpha =0.1)+
   geom_histogram(data=subset(bytwoyears,Year=="X2000"), color ="darkblue",fill="blue",alpha =0.1)
+ggsave(paste(pathg,"Graf_2.png",sep=""))
+
 bytwoyears <- filter(bytwoyears,Year %in%c("X1960","X2000"))
 ggplot(bytwoyears,aes(x=FertilityRate,group=Year, color=Year,alpha=0.2))+
   geom_histogram(aes(y=..density..))+
   geom_density(data=subset(bytwoyears,Year=="X1960"),kernel="gaussian", color ="darkgreen",fill="green",alpha =0.1,bw=5)+
   geom_density(data=subset(bytwoyears,Year=="X2000"), color ="darkblue",fill="blue",alpha =0.1,bw=15)
+ggsave(paste(pathg,"Graf_3.png",sep=""))
+
 byyearX1960<-filter(bytwoyears,Year=="X1960")
 byyearX2000<-filter(bytwoyears,Year=="X2000")
 plot(ecdf(byyearX1960$FertilityRate),col ="blue")
 par(new=TRUE)  #No new window
 plot(ecdf(byyearX2000$FertilityRate),col="red")
+dev.copy(png,paste(pathg,"Graf_4.png",sep=""))
+dev.off()
+
 setwd(patho)
